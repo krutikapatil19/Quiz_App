@@ -1,156 +1,180 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final List<Map> quizCategories = [
-    {
-      'category': "General Knowledge",
-      "quiz1": "History & Culture",
-      "quiz2": "World Geography",
-      "quiz3": "Inventions",
-      "quiz4": "Current Affairs",
-    },
-    {
-      'category': "Science",
-      "quiz1": "Physics Basics",
-      "quiz2": "Biology Quiz",
-      "quiz3": "Chemistry Facts",
-    },
-    {
-      'category': "Programming",
-      "quiz1": "Flutter Basics",
-      "quiz2": "Data Structures",
-      "quiz3": "OOP Concepts",
-    },
-    {
-      'category': "Sports",
-      "quiz1": "Cricket Quiz",
-      "quiz2": "Olympics History",
-      "quiz3": "Football Legends",
-      "quiz4": "Tennis Trivia",
-    },
-  ];
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Quiz App",
+    return const MaterialApp(
+      home: QuizApp(),
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.black,
+    );
+  }
+}
+
+class QuizApp extends StatefulWidget {
+  const QuizApp({super.key});
+
+  @override
+  State createState() => _QuizAppState();
+}
+
+class _QuizAppState extends State<QuizApp> {
+  bool isStartPage = true;
+  int score = 0;
+
+  List<Map> allQuestions = [
+    {'question': "Who is the founder of Microsoft?", 'options': ["Steve Jobs", "Elon Musk", "Bill Gates", "Larry Page"], 'correctAnswer': 2},
+    {'question': "Who is the Founder of Apple?", 'options': ["Steve Jobs", "Bill Gates", "Elon Musk", "Larry Page"], 'correctAnswer': 0},
+    {'question': "Who is the founder of Google?", 'options': ["Steve Jobs", "Elon Musk", "Bill Gates", "Larry Page"], 'correctAnswer': 3},
+    {'question': "Who is the founder of OpenAI?", 'options': ["Sam Altman", "Elon Musk", "Bill Gates", "Larry Page"], 'correctAnswer': 0},
+    {'question': "Who is the Founder of SpaceX?", 'options': ["Steve Jobs", "Elon Musk", "Bill Gates", "Larry Page"], 'correctAnswer': 1},
+  ];
+
+  int currentQuestionIndex = 0;
+  int selectedAnswerIndex = -1;
+  bool isQuestionPage = true;
+
+  WidgetStatePropertyAll<Color?> checkAnswer(int answerIndex) {
+    if (selectedAnswerIndex != -1) {
+      if (answerIndex == allQuestions[currentQuestionIndex]['correctAnswer']) {
+        return const WidgetStatePropertyAll(Colors.green);
+      } else if (selectedAnswerIndex == answerIndex) {
+        return const WidgetStatePropertyAll(Colors.red);
+      }
+    }
+    return const WidgetStatePropertyAll(null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isStartPage) {
+      return Scaffold(
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              setState(() {
+                isStartPage = false;
+              });
+            },
+            child: const Text("Start Quiz", style: TextStyle(fontSize: 20)),
+          ),
+        ),
+      );
+    }
+
+    return quizAppPage();
+  }
+
+  Scaffold quizAppPage() {
+    if (isQuestionPage) {
+      return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.black,
-          title: Row(
-            children: [
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: Image.network(
-                  'https://cdn-icons-png.flaticon.com/512/3176/3176365.png',
-                  fit: BoxFit.contain,
+          centerTitle: true,
+          title: const Text("QuizApp",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: Colors.orange)),
+          backgroundColor: Colors.blue,
+        ),
+        body: Column(
+          children: [
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const SizedBox(width: 120),
+                Text("Question : ${currentQuestionIndex + 1}/${allQuestions.length}",
+                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 50,
+              width: 380,
+              child: Text(allQuestions[currentQuestionIndex]['question'],
+                  style: const TextStyle(fontSize: 25, color: Colors.purple, fontWeight: FontWeight.w600)),
+            ),
+            const SizedBox(height: 20),
+
+            for (int i = 0; i < allQuestions[currentQuestionIndex]['options'].length; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: SizedBox(
+                  height: 50,
+                  width: 300,
+                  child: ElevatedButton(
+                    style: ButtonStyle(backgroundColor: checkAnswer(i)),
+                    onPressed: () {
+                      if (selectedAnswerIndex == -1) {
+                        selectedAnswerIndex = i;
+                        if (i == allQuestions[currentQuestionIndex]['correctAnswer']) {
+                          score++;
+                        }
+                        setState(() {});
+                      }
+                    },
+                    child: Text(allQuestions[currentQuestionIndex]['options'][i],
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
-                'QuizApp',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // ✅ FIXED
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    selectedAnswerIndex = -1;
+                    setState(() {});
+                  }
+                },
+                backgroundColor: Colors.blue,
+                child: const Text("Prev", style: TextStyle(fontSize: 15, color: Colors.orange)),
+              ),
+              FloatingActionButton(
+                onPressed: () {
+                  if (selectedAnswerIndex != -1) {
+                    if (currentQuestionIndex < allQuestions.length - 1) {
+                      currentQuestionIndex++;
+                      selectedAnswerIndex = -1;
+                    } else {
+                      isQuestionPage = false;
+                    }
+                    setState(() {});
+                  }
+                },
+                backgroundColor: Colors.blue,
+                child: const Text("Next", style: TextStyle(fontSize: 15, color: Colors.orange)),
               ),
             ],
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.account_circle),
-              onPressed: () {},
-            ),
-          ],
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: List.generate(quizCategories.length, (index) {
-                final category = quizCategories[index];
-                final quizzes = category.entries
-                    .where((entry) => entry.key.startsWith('quiz'))
-                    .map((entry) => entry.value)
-                    .toList();
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category['category'],
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: quizzes.map((quizTitle) {
-                          return Container(
-                            width: 150,
-                            height: 100,
-                            margin: const EdgeInsets.only(right: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.red[400],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  quizTitle,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                );
-              }),
-            ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(backgroundColor: Colors.blue, centerTitle: true, title: const Text("Result Screen", style: TextStyle(fontSize: 30))),
+        body: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              Image.network("https://tse2.mm.bing.net/th/id/OIP.sz4fIixQ1wm0_fihZ66uwwHaDt?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+                  width: 400, height: 440, fit: BoxFit.fill),
+              const SizedBox(height: 40),
+              Text("Your Score: $score/${allQuestions.length}", style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 20),
+              const Text("🎉 Congratulations! 🎉", style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700)),
+            ],
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.black,
-          selectedItemColor: Colors.red,
-          unselectedItemColor: Colors.white,
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Quizzes'),
-            BottomNavigationBarItem(icon: Icon(Icons.leaderboard), label: 'Leaderboard'),
-            BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          ],
-        ),
-      ),
-    );
+      );
+    }
   }
 }
