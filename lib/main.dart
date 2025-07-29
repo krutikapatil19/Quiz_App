@@ -122,7 +122,7 @@ class _QuizAppState extends State<QuizApp> {
               ),
           ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // ✅ FIXED
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // 
         floatingActionButton: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Row(
